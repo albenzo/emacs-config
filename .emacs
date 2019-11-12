@@ -194,6 +194,7 @@
 
 (use-package haskell-process
   :after (haskell-interactive-mode)
+  :config
   (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
 
 (use-package company-ghci
