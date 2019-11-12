@@ -1,7 +1,9 @@
 (package-initialize)
 (menu-bar-mode 0)
-(tool-bar-mode 0)
-(scroll-bar-mode 0)
+(if (display-graphic-p)
+    (progn
+      (tool-bar-mode 0)
+      (scroll-bar-mode 0)))
 (tooltip-mode 0)
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))
 
@@ -18,7 +20,6 @@
 (require 'package)
 (setq package-enable-at-startup nil)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
-(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
 
 (unless (package-installed-p 'use-package)
@@ -90,7 +91,7 @@
   :config
   (global-undo-tree-mode 1)
   :bind (("C-z" . undo)
-("C-S-z" . undo-tree-redo)))
+         ("C-S-z" . undo-tree-redo)))
 
 (use-package rainbow-delimiters
   :ensure t
@@ -111,18 +112,18 @@
   (TeX-PDF-mode t)
   :config
   (add-hook 'LaTeX-mode-hook
-   '(lambda () (define-key LaTeX-mode-map (kbd "$") 'self-insert-command)))
+            '(lambda () (define-key LaTeX-mode-map (kbd "$") 'self-insert-command)))
   (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
   (add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
   (add-hook 'LaTeX-mode-hook
-   (lambda ()
-     (add-hook 'after-save-hook
-(lambda () (latex-unicode-simplified))
-nil
-t)))
+            (lambda ()
+              (add-hook 'after-save-hook
+                        (lambda () (latex-unicode-simplified))
+                        nil
+                        t)))
   :bind (("RET" . newline-and-indent)
-:map LaTeX-mode-map
-("RET" . newline-and-indent)))
+         :map LaTeX-mode-map
+         ("RET" . newline-and-indent)))
 
 (use-package semantic
   :ensure nil
@@ -181,6 +182,28 @@ t)))
   (add-hook 'racer-mode-hook #'eldoc-mode)
   (add-hook 'racer-mode-hook #'company-mode))
 
+(use-package haskell-mode
+  :ensure t
+  :config
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
+  (add-hook 'haskell-mode-hook #'flycheck-haskell-setup))
+
+(use-package haskell-interactive-mode
+  :after (haskell-mode))
+
+(use-package haskell-process
+  :after (haskell-interactive-mode)
+  (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
+
+(use-package company-ghci
+  :ensure t
+  :after (company haskell-mode haskell-interactive-mode)
+  :config
+  (push 'company-ghci company-backends)
+  (add-hook 'haskell-mode-hook 'company-mode)
+  (add-hook 'haskell-interactive-mode-hook 'company-mode))
+
 (use-package flycheck
   :ensure t
   :config
@@ -193,7 +216,7 @@ t)))
 (use-package org
   :ensure t
   :bind (("C-c a" . org-agenda)
-("C-c c" . org-capture)))
+         ("C-c c" . org-capture)))
 
 (use-package deft
   :ensure t
@@ -216,6 +239,6 @@ t)))
 (setq backup-directory-alist `(("." . "~/.saves")))
 (setq backup-by-copying t)
 (setq delete-old-versions t
-kept-new-versions 2
-kept-old-versions 2
-version-control t)
+      kept-new-versions 2
+      kept-old-versions 2
+      version-control t)
